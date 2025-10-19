@@ -1,0 +1,715 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Blazor introductory tutorial</title>
+  <link href="https://www.w3schools.com/w3css/4/w3.css" rel="stylesheet" type="text/css">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    .highlight {
+      color: purple;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="w3-content">
+    <div class="w3-display-container"> <img src="../images/tutorial1/BlazorComputer.png"
+        style="width:100%; object-fit:cover" alt="" /> </div>
+    <div class="w3-container">
+      <h2>Blazor introductory tutorial</h2>
+      <p>
+        <i>
+          Unfortunately this will be the only tutorial of this kind I make. It just takes too much time to make them
+          like this. Instead I'm considering another tutorial format in the future.
+        </i>
+      </p>
+      <p>
+        You can access the source for this demo project on <a href="https://github.com/KalleTakeuchi/TodoList"> github</a>.
+      </p>
+      <p> This year (2024) I started working with Blazor. It is my first web framework and to be honest I never imagined
+        myself doing any kind of web development. What kept the gate closed for me all these years was the rapid pace of
+        change in the web world. Sure, PHP is probably not so different now from how it was ten years ago, but everyone
+        always goes on about how bad it is. The alternatives are just a jungle of flavor of the day frameworks. Node js,
+        react, vue, angular, django, ruby on rails… as someone who has mainly worked on desktop apps and industrial
+        automation, they all look really intimidating and difficult to learn. But when I first stumbled upon Blazor I
+        felt, for the first time, that this is actually something I could learn in a reasonable amount of time. It used
+        C# after all. </p>
+      <p> As my first tutorial on this site I’m going to talk about Blazor using a small tutorial project which includes
+        many of the staples of the framework: Components with parameters, cascading values and event callbacks as
+        well as general event handling. I will also touch upon some overridable lifecycle methods and we're going to
+        learn how one can dynamically change the CSS of a webpage with Blazor. </p>
+      <p> We are going to make a small to-do list where every list item is a component with the following attributes:
+      <ul>
+        <li> Checked/unchecked state </li>
+        <li> Some text </li>
+        <li> Assignee (the person who should perform the task) </li>
+      </ul>
+      </p>
+      <h3>Set up the project</h3>
+      <p> I’ll assume you are using Visual Studio for this. Create a new Blazor Web App project (I’m using .Net 8 for
+        this). We are going to use server-side rendering because it’s quick and easy to get a small project up and
+        running with it. </p>
+      <p>Essentially there are two variants of Blazor projects. One is where the html is rendered on the server side and
+        transferred to the client. The other uses Web Assembly to basically run a .Net runtime in the browser and the
+        rendering is done entirely on the client side. Needless to say, the case for using client side rendering grows
+        stronger the more computationally intensive the application is. The downside of client side apps is that you have
+        to develop a backend for your app. Web Assembly apps cannot, for example, connect to databases, so you need a
+        backend application to handle that. Using server side rendering, everything is done on the server, so you can
+        use the full functionality of .Net, including entity framework for working with SQL-applications. </p>
+      <p> Actually, there is a way of letting the client browser handle computation in a server-side app: Javascript
+        interop. Your Blazor code can start a Javascript function on the client, which can be really useful. Nowadays
+        there is apparently also a way of combining server and client-side blazor in one project. I haven't studied up
+        on that much. </p>
+      <p> Anyway, in the solution explorer, clear all the template files in PageComponents and Pages. Also, remove the
+        navbar component from the Layout folder. Keep MainLayout.razor and open it. Remove the code already there and
+        copy-paste this code there instead. </p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> @inherits LayoutComponentBase<br>
+          <br>
+          &lt;div class="page"&gt;<br>
+          <div style="padding-left:2em;">&#9;&lt;main&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;article class="content px-4"&gt;<br>
+          </div>
+          <div style="padding-left:6em;">@Body<br>
+          </div>
+          <div style="padding-left:4em;"> &lt;/article&gt;<br>
+          </div>
+          <div style="padding-left:2em;"> &lt;/main&gt;<br>
+          </div>
+          <div> &lt;/div&gt;<br>
+            <br>
+          </div>
+          <div>&lt;div id="blazor-error-ui"&gt;<br>
+          </div>
+          <div style="padding-left:2em;">An unhandled error has occurred.<br>
+          </div>
+          <div style="padding-left:2em;"> &lt;a href="" class="reload"&gt;Reload&lt;/a&gt;<br>
+          </div>
+          <div style="padding-left:2em;"> &lt;a class="dismiss"&gt;🗙&lt;/a&gt;<br>
+          </div>
+          <div> &lt;/div&gt;<br>
+          </div>
+        </div>
+        <div class="w3-text-gray w3-small">MainLayout.razor</div>
+      </div>
+      <p> This is where the general layout of the application is defined. Here we would normally define a navigation
+        bar, but we don't need to in this project. Embedded in the page div, main and article tags there is the text
+        @Body. That is where the currently loaded page is shown. I will go over page navigation in another tutorial.
+      </p>
+      <p> Next, open up App.razor. We are using Bootstrap for CSS as it is included in the template project. If you want
+        to change this, you’ll need to edit the head section in App.razor. The CSS files should be stored in the wwwroot
+        folder. Here we are also going to make a change in the tags HeadOutlet and Routes. We are going to turn off
+        prerendering here. </p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code">
+          <div>&lt;!DOCTYPE html&gt;<br>
+          </div>
+          <div>&lt;html lang="en"&gt;<br>
+            <br>
+          </div>
+          <div>&lt;head&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;meta charset="utf-8" /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;meta name="viewport" content="width=device-width,
+            initial-scale=1.0"/&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;base href="/" /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;link rel="stylesheet" href="bootstrap/bootstrap.min.css" /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;link rel="stylesheet" href="app.css" /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;link rel="stylesheet" href="TodoList.styles.css" /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;link rel="icon" type="image/png" href="favicon.png" /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;HeadOutlet @rendermode="new InteractiveServerRenderMode(prerender: false)"
+            /&gt;<br>
+          </div>
+          <div>&lt;/head&gt;<br>
+            <br>
+          </div>
+          <div>&lt;body&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;Routes @rendermode="new InteractiveServerRenderMode(prerender: false)"
+            /&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;script src="_framework/blazor.web.js"&gt;&lt;/script&gt;<br>
+          </div>
+          <div>&lt;/body&gt;<br>
+            <br>
+          </div>
+          <div>&lt;/html&gt;<br>
+          </div>
+        </div>
+        <div class="w3-text-gray w3-small">App.razor</div>
+      </div>
+      <h3>Making a component</h3>
+      <p> Having dabbled in making websites before, I always found it strange how normal html doesn’t have the concept
+        of a component. A part of the website you define once and then reuse several times. Wouldn’t it be sweet to define a
+        reusable component to call wherever necessary. If it needs to be changed, it can be done in one place instead of
+        all over the website. And if it needs to be customized or dynamically changed, you just pass arguments to it,
+        like a class in any language that supports OOP. This is what components in Blazor (and the corresponding concept in other frameworks) 
+        can achieve. </p>
+      <p> First we are going to create the list item component. Create a new razor component in the folder
+        Components/PageComponents using the solution explorer. We can call it ListItem.razor. We are going to use
+        Bootstrap’s row and column structure. The component will consist of three columns, each containing one control,
+        like this: </p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> @rendermode InteractiveServer<br>
+          <br>
+          <div>&lt;div class="container"&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;div class="row"&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;div class="col align-content-center center justify-content-center"&gt;<br>
+          </div>
+          <div style="padding-left:6em;"> &lt;input type="text" class="form-control" @bind="Item.Text"
+            @onfocusout="async ()=&gt;await OnChange.InvokeAsync()" /&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;/div&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;div class="col align-content-center center justify-content-center"&gt;<br>
+          </div>
+          <div style="padding-left:6em;">&lt;div style="@CheckboxStyle" @onclick="async ()=&gt;{Item.IsChecked =
+            !Item.IsChecked; await OnChange.InvokeAsync();}"&gt;&lt;/div&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;/div&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;div class="col align-content-center center justify-content-center"&gt;<br>
+          </div>
+          <div style="padding-left:6em;">&lt;button class="btn btn-danger" @onclick="async ()=&gt;await
+            OnRemoveClick.InvokeAsync(Item)"&gt;Remove&lt;/button&gt;<br>
+          </div>
+          <div style="padding-left:4em;">&lt;/div&gt;<br>
+          </div>
+          <div style="padding-left:2em;">&lt;/div&gt;<br>
+          </div>
+          <div>&lt;/div&gt;</div>
+        </div>
+        <div class="w3-text-gray w3-small">ListItem.razor</div>
+      </div>
+      <p> In the first column we have a text input. Everything looks like standard bootstrap except two attributes
+        beginning with @. This is the Blazor secret sauce. Let’s begin with <span class="highlight">@bind</span>
+        attribute. </p>
+      <h4>Binding</h4>
+      <p> Binding connects a value in the html code with a C# variable. The binding goes both ways, so if you bind a
+        text input to a string variable called <span class="highlight">Text</span> the string will change when the value
+        in the text input changes. Conversely, the value of the input will change if <span class="highlight">Text</span>
+        is changed by program code. </p>
+      <h4>C# in my html? More likely than you think!</h4>
+      <p> "Hold on", I hear you say after reading the previous paragraph, "What program code? What variable?"
+        Yeah, we almost skipped over that, didn't we. After all the html, add the following: </p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> @code {<br>
+          <div style="padding-left:2em;">private string CheckboxStyle <br>
+            {
+            <div style="padding-left:2em;">get<br>
+              {
+              <div style="padding-left:2em;">return string.Format("width: 20pt; height: 20pt; border-radius: 50%;
+                border: 1pt solid black; background-color: {0};", BackgroundColor);</div>
+              }
+            </div>
+            }
+          </div>
+          <div style="padding-left:2em;"> <br>
+            private string BackgroundColor<br>
+            {
+            <div style="padding-left:2em;"> get<br>
+              {
+              <div style="padding-left:2em;"> if (Item == null)<br>
+                {
+                <div style="padding-left:2em;"> return "white"; </div>
+                } <br>
+                if (Item.IsChecked) <br>
+                {
+                <div style="padding-left:2em;"> return "green"; </div>
+                } <br>
+                else<br>
+                {
+                <div style="padding-left:2em;"> return "white"; </div>
+                }
+              </div>
+              }
+            </div>
+            } <br>
+            <br>
+            [CascadingParameter]<br>
+            public required ChecklistItem Item { get; set; }<br>
+            <br>
+            [Parameter] <br>
+            public EventCallback OnChange { get; set; } <br>
+            <br>
+            [Parameter]<br>
+            public EventCallback OnRemoveClick { get; set; }
+          </div>
+          }
+        </div>
+        <div class="w3-text-gray w3-small">ListItem.razor</div>
+      </div>
+      <p> Ah yes, good old C#. This feels nice and safe... unless you don't use C# or Java, that is. As you might have
+        guessed, the <span class="highlight">@code</span> tag indicates the beginning of some C# shenanigans. You can
+        keep an entire class worth of C#
+        code within this section. It is also possible to use a separate .cs file for this to keep html and C# apart, but
+        we will not do that this time.</p>
+      <p>First, we have a string property called <span class="highlight">CheckboxStyle</span>. This is used in the <span
+          class="highlight">style</span> tag of a div in the
+        html. Scroll up and have a look. Depending on the state of an <span class="highlight">Item</span> object passed
+        as a parameter to the component, a style with a different background color is used. Thus, we are dynamically
+        changing the style of the component using inline CSS. In this case we are looking at a circle which turns green
+        if the component state is checked. </p>
+      <p> Next, we have a tag <span class="highlight">[CascadingParameter]</span> preceding the <span
+          class="highlight">Item</span> property
+        mentioned above. Normally this would be passed as a standard parameter, but we are using a cascading one to
+        illustrate how to use them. Cascading parameters are most useful if you have components embedded in other
+        components and you want to propagate a value
+        down through the entire hierarchy. For example a font size or color. We will soon take a look at the <span
+          class="highlight">ChecklistItem</span> class. </p>
+      <p> <span class="highlight">OnChange</span> and <span class="highlight">OnRemoveClick</span> are standard
+        parameters to be passed to the component. Their type is <span class="highlight">EventCallback</span>. In the
+        html they are linked to events of the text input, circular div and the remove button. The parent component (or
+        page) will pass method references to these parameters and they will be invoked by the event handlers in this
+        component. Note the @ before the event names in the html. In this case, the event handlers are defined in-line as
+        lambda functions, but you can use the name of a method in the component as well. If you want to pass arguments
+        to the method, it must be called within a lambda function like this: </p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> @onclick="()=&gt;MyMethod(argument)" </div>
+      </div>
+      <h4>ChecklistItem</h4>
+      <p> This class represents the data and state of each list item. The component we made earlier is just a graphical
+        user interface to interact with the list items. This is a very simple class, so I won't discuss it in much
+        detail: </p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> public class ChecklistItem<br>
+          {
+          <div style="padding-left:2em"> public bool IsChecked { get; set; } = false; <br>
+            public string Text { get; set; } = string.Empty; <br>
+            public string Assignee { get; set; } = string.Empty; <br>
+            <br>
+            public ChecklistItem(string assignee) <br>
+            {
+            <div style="padding-left:2em"> Assignee = assignee;<br>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="w3-text-gray w3-small">ChecklistItem.cs</div>
+      </div>
+      <h3>Creating the main page</h3>
+      <p> The main page of the app has an input field and two buttons to add and remove assignees with. There is also a
+        dropdown menu to select assignee with. </p>
+      <p> It should be noted that Blazor comes with a dropdown component out of the box, so you don't have to implement
+        one like I have here. But it will serve as a good illustration of how to use C# to dynamically change a page.
+        Here is the html code for the entire page: </p>
+
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> @page "/"<br>
+          @inherits LayoutComponentBase<br>
+          @rendermode InteractiveServer<br>
+          @using System.Text.Json<br>
+          <br>
+          &lt;h3&gt;Todo list&lt;/h3&gt;<br>
+          &lt;div class="container"&gt;
+          <div style="padding-left:2em;"> &lt;div class="row p-2"&gt;
+            <div style="padding-left"> &lt;div class="col"&gt;
+              <div style="padding-left:2em;"> &lt;input type="text" @bind="NewUser" class="form-control" /&gt;" </div>
+              &lt;/div&gt;<br>
+              &lt;div class="col"&gt;
+              <div style="padding-left:2em;"> &lt;button class="btn btn-primary" @onclick="async ()=&gt; await
+                OnNewUserClickAsync()"&gt;Add assignee&lt;/button&gt; </div>
+              &lt;/div&gt;
+            </div>
+            &lt;/div&gt;<br>
+            &lt;div class="row p-2" &gt;
+            <div style="padding-left:2em;"> &lt;div class="col"&gt;
+              <div style="padding-left:2em;"> &lt;button class="btn btn-secondary dropdown-toggle" type="button"
+                @onclick="()=&gt;Dropdown = !Dropdown"&gt;@SelectedUser&lt;/button&gt;<br>
+                @if (Dropdown)<br>
+                {
+                <div style="padding-left:2em;"> &lt;ul class="dropdown-menu dropdown-menu-expanded" style="display:
+                  block !important;" @onmouseleave="()=&gt;Dropdown = false"&gt;
+                  <div style="padding-left:2em;">
+                    @for (int i = 0; i &lt; Users.Count; i++) <br>
+                    {
+                    <div style="padding-left:2em;"> int iClone = i;<br>
+                      &lt;li class="dropdown-item" @onclick="()=&gt;SelectedUserIndex = iClone"&gt;@Users[i]&lt;/li&gt;
+                    </div>
+                    }
+                  </div>
+                  &lt;/ul&gt;
+                </div>
+                }
+              </div>
+              &lt;/div&gt;<br>
+              &lt;div class="col"&gt;
+              <div style="padding-left:2em;"> &lt;button class="btn btn-primary" @onclick="async ()=&gt; await
+                OnRemoveUserClickAsync()"&gt;Remove assignee&lt;/button&gt; </div>
+              &lt;/div&gt;
+            </div>
+            &lt;/div&gt;<br>
+            @if (Items != null)<br>
+            {
+            <div style="padding-left:2em;"> @for (int i = 0; i &lt; UserItems.Count; i++)<br>
+              {
+              <div style="padding-left:2em;"> &lt;div class="row p-2"&gt;
+                <div style="padding-left:2em"> &lt;div class="col"&gt;
+                  <div style="padding-left:2em"> &lt;CascadingValue Value="UserItems[i]"&gt;
+                    <div style="padding-left:2em"> &lt;TodoList.Components.PageComponents.ListItem
+                      OnChange="SaveItemsAsync" OnRemoveClick="async (item)=&gt;await OnRemoveItemClickAsync(item)"
+                      /&gt; </div>
+                    &lt;/CascadingValue&gt;
+                  </div>
+                  &lt;/div&gt;
+                </div>
+                &lt;/div&gt;
+              </div>
+              }
+            </div>
+            }<br>
+            &lt;div class="row p-2"&gt;
+            <div style="padding-left:2em"> &lt;div class="col"&gt;
+              <div style="padding-left:2em"> &lt;button class="btn btn-primary" @onclick="async ()=&gt; await
+                OnNewItemClickAsync()"&gt;New&lt;/button&gt; </div>
+              &lt;/div&gt;
+            </div>
+            &lt;/div&gt;
+          </div>
+          &lt;/div&gt;
+        </div>
+        <div class="w3-text-gray w3-small">List.razor</div>
+      </div>
+
+      <p>
+        As you can see, there is a dropdown button of the class droppdown-toggle. The dropdown part itself is a list
+        with class dropdown-menu and dropdown-menu-expanded. It is nested insde a C# if-statement (marked with a <span
+          class="highlight">@</span> to differ it from the html) and only shown if the boolean variable <span
+          class="highlight">Dropdown</span> (defined in the code section below) is true. This way the dropdown list can
+        be dynamically shown and hidden. The <span class="highlight">Dropdown</span> variable is toggled in the lambda
+        function that handles the <span class="highlight">@onclick</span> event (note the <span
+          class="highlight">@</span>). We also reset the variable if the mouse cursor leaves the dropdown list, using
+        <span class="highlight">@onmouseleave</span>, or if a list item was clicked, using the <span
+          class="highlight">@onclick</span> event.
+      </p>
+
+      <p>
+        We also have a button for removing assignees, which calls an asynchronous C# function when clicked. If you are
+        unfamiliar, async and await are keywords that lets a function start in a background thread, allowing the ui to
+        continue being responsive while it's running. It is very good to use background threads when reading or writing
+        data since you don't want your website to freeze. There are many other models for asychronous processing, but
+        async/await is one of the easiest to use in C#.
+      </p>
+
+      <p>
+        There is of course also a button for adding assignees.
+      </p>
+
+      <p> Take a look at the section starting with <span class="highlight">@if (Items != null)</span>. Here we first
+        check if the assignee has any items and if it does, we add a ListItem component for each item. By using loops
+        like this, mutiple instances of components can easily be created. This is useful when generating reports or
+        lists. Of course, the same method is used to populate the asignee list.</p>
+      <p>Let's stay in the loop that creates list items. Note how the cascading value tag contains the component. If the
+        components were to contain further components inside themselves, the cascading value can be passed on to them as
+        well. A more reasonable use case for a cascading value is a color or font style. The item object should have
+        been passed a parameter - not a cascading value - if this was serious code.&nbsp;</p>
+      <p>Speaking of parameters, the two methods that will handle change and removal are passed as normal parameters.
+      </p>
+      <p>Those not familiar with lambda functions in C#, look a the function passed in the OnRemoveClick parameter and
+        in other locations. In order to pass an async function the syntax starting with two parenthesis is necessary. If
+        any variable should be passed to the lambda function, it should be placed inside these parenthesis.</p>
+      <p>Let's move on the the code section.&nbsp;</p>
+      <div class="w3-panel w3-card w3-light-grey">
+        <div class="w3-code"> @code {<br>
+          <div style="padding-left:2em"> private const string STORAGE_USER_LIST = "users.json"; <br>
+            private const string STORAGE_ITEMS_LIST = "items.json";<br>
+            <br>
+            private string NewUser { get; set; } = string.Empty;<br>
+            private bool Dropdown { get; set; } = false;<br>
+            private int SelectedUserIndex { get; set; } = 0;<br>
+            private string SelectedUser<br>
+            {
+            <div style="padding-left:2em"> get<br>
+              {
+              <div style="padding-left:2em"> if (Users == null)<br>
+                {
+                <div style="padding-left:2em"> return string.Empty; </div>
+                }
+                else if (Users.Count &lt;= SelectedUserIndex)<br>
+                {
+                <div style="padding-left:2em"> return string.Empty; </div>
+                }<br>
+                else <br>
+                {
+                <div style="padding-left:2em"> return Users[SelectedUserIndex]; </div>
+                }
+              </div>
+              }
+            </div>
+            }<br>
+            private List&lt;ChecklistItem&gt; UserItems <br>
+            {
+            <div style="padding-left:2em">
+              get <br>
+              {
+              <div style="padding-left:2em">
+                if (Items == null) <br>
+                {
+                <div style="padding-left:2em">
+                  return new();
+                </div>
+                }<br>
+                return Items.Where((i) => i.Assignee == SelectedUser).ToList();
+              </div>
+              }
+            </div>
+            }<br>
+            private List&lt;string&gt;? Users { get; set; } <br>
+            private List&lt;ChecklistItem&gt;? Items { get; set; }<br>
+            private async Task OnNewUserClickAsync()<br>
+            {<br>
+            <div style="padding-left:2em">
+              if (Users != null && !string.IsNullOrEmpty(NewUser))<br>
+              {<br>
+              <div style="padding-left:2em">
+                if (Users.Contains(NewUser)) <br>
+                {
+                <div style="padding-left:2em">
+                  return;
+                </div>
+                }<br><br>
+
+                Users.Add(NewUser); <br>
+                await SaveUsersAsync();
+              </div>
+              }
+            </div>
+            } <br>
+            private async Task OnNewItemClickAsync()<br>
+            {<br>
+            <div style="padding-left:2em">
+              if (Items == null) <br>
+              {
+              <div style="padding-left:2em">
+                return;
+              </div>
+              } <br><br>
+              Items.Add(new ChecklistItem(SelectedUser));<br>
+              await SaveItemsAsync();
+            </div>
+            } <br>
+            protected override async Task OnInitializedAsync() <br>
+            {<br>
+            <div style="padding-left:2em">
+              var res1 = await LoadItemsAsync();<br>
+              if (res1 == null) <br>
+              {
+              <div style="padding-left:2em">
+                res1 = new();
+              </div>
+              } <br>
+              Items = res1; <br>
+              <br>
+              var res2 = await LoadUsersAsync();<br>
+              if (res2 == null) <br>
+              {
+              <div style="padding-left:2em">
+                res2 = new();
+              </div>
+              } <br>
+              Users = res2; <br> <br>
+              if (Users.Count == 0) <br>
+              {
+              <div style="padding-left:2em">
+                Users.Add("default user");
+              </div>
+              }
+            </div>
+            }
+            <br>
+            <br>
+            private async Task OnRemoveItemClickAsync(Object item) <br>
+            {
+            <div style="padding-left:2em">
+              if (Items == null) <br>
+              {
+              <div style="padding-left:2em">
+                return;
+              </div>
+              } <br>
+              <br>
+              Items.Remove((ChecklistItem)item); <br>
+              await SaveItemsAsync(); <br>
+            </div>
+            } <br>
+            <br>
+            private async Task OnRemoveUserClickAsync() <br>
+            {
+            <div style="padding-left:2em">
+              int tempIndex = SelectedUserIndex; <br>
+              string tempUser = SelectedUser; <br>
+              <br>
+              if (SelectedUserIndex > 0) <br>
+              {
+              <div style="padding-left:2em">
+                SelectedUserIndex -= 1;
+              </div>
+              } <br>
+              else <br>
+              {
+              <div style="padding-left:2em">
+                SelectedUserIndex = 0;
+              </div>
+              } <br>
+              <br>
+              if (Items == null) <br>
+              {
+              <div style="padding-left:2em">
+                return;
+              </div>
+              } <br>
+              <br>
+              Users.RemoveAt(tempIndex); <br>
+              Items.RemoveAll((i) => i.Assignee == tempUser); <br>
+              await SaveItemsAsync(); <br>
+              await SaveUsersAsync(); <br>
+            </div>
+            } <br>
+            <br>
+            private async Task SaveItemsAsync() <br>
+            {
+            <div style="padding-left:2em">
+              if (Items == null) <br>
+              {
+              <div style="padding-left:2em">
+                return;
+              </div>
+              } <br>
+              var fileStream = File.Create(STORAGE_ITEMS_LIST); <br>
+              await JsonSerializer.SerializeAsync(fileStream, Items); <br>
+              fileStream.Close(); <br>
+              fileStream.Dispose(); <br>
+            </div>
+            } <br>
+            <br>
+            private async Task SaveUsersAsync() <br>
+            {
+            <div style="padding-left:2em">
+              if (Items == null) <br>
+              {
+              <div style="padding-left:2em">
+                return;
+              </div>
+              } <br>
+              var fileStream = File.Create(STORAGE_USER_LIST); <br>
+              await JsonSerializer.SerializeAsync(fileStream, Users); <br>
+              fileStream.Close(); <br>
+              fileStream.Dispose(); <br>
+            </div>
+            } <br>
+            <br>
+            private async Task&lt;List&lt;string&gt;&gt; LoadUsersAsync() <br>
+            {
+            <div style="padding-left:2em">
+              if (File.Exists(STORAGE_USER_LIST)) <br>
+              {
+              <div style="padding-left:2em">
+                var fileStream = File.OpenRead(STORAGE_USER_LIST); <br>
+                List<string>? users = await JsonSerializer.DeserializeAsync<List<string>>(fileStream); <br>
+                    fileStream.Close(); <br>
+                    fileStream.Dispose(); <br>
+                    if (users == null) <br>
+                    {
+                    <div style="padding-left:2em">
+                      return new();
+                    </div>
+                    } <br>
+                    else <br>
+                    {
+                    <div style="padding-left:2em">
+                      return users!;
+                    </div>
+                    }
+              </div>
+              } <br>
+              else <br>
+              {
+              <div style="padding-left:2em">
+                return new();
+              </div>
+              }
+            </div>
+            } <br>
+            <br>
+            private async Task&lt;List&lt;ChecklistItem&gt;&gt; LoadItemsAsync() <br>
+            {
+            <div style="padding-left:2em">
+              if (File.Exists(STORAGE_ITEMS_LIST)) <br>
+              {
+              <div style="padding-left:2em">
+                var fileStream = File.OpenRead(STORAGE_ITEMS_LIST); <br>
+                List<ChecklistItem>? items = await JsonSerializer.DeserializeAsync<List<ChecklistItem>>(fileStream);
+                    <br>
+                    fileStream.Close(); <br>
+                    fileStream.Dispose(); <br>
+                    if (items == null) <br>
+                    {
+                    <div style="padding-left:2em">
+                      return new();
+                    </div>
+                    } <br>
+                    else <br>
+                    {
+                    <div style="padding-left:2em">
+                      return items!;
+                    </div>
+                    }
+              </div>
+              } <br>
+              else <br>
+              {
+              <div style="padding-left:2em">
+                return new();
+              </div>
+              }
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="w3-text-gray w3-small">List.razor</div>
+      </div>
+      <p>
+        Much of the code should explain itself. We have properties that are used in the HTML part 
+        of the file and lists that hold data. Users and list items are stored as JSON files using 
+        serializers included in .NET. 
+      </p> 
+      <p>One thing to take note of when working with Blazor server 
+        projects is that the file IO operations take place on the server, not the client. 
+        Actually, all functions are executed on the server. So if you, for example, want to play a sound 
+        and use the .NET functions for this, sound will not play on the client browser,
+        but in your server room, assuming your server has a speaker. However, 
+        JavaScript is always executed on the client browser. So you can use Javascript
+        to do file IO or other stuff client side. 
+      </p>
+      <p>
+        Another important aspect of Blazor is the lifecycle methods. In this case we are overriding
+        OnInitializedAsync. This allows us to do stuff as the webpage is loaded. In 
+        this case we load the users and list items from storage. If no users are found we
+        add a default user.
+      </p>
+      <p>
+        While not used here, there also is the OnAfterRender and OnParametersSet methods which
+        can be overwritten. OnParametersSet allows you to see if parameters have changed before
+        taking action on them. OnAfterRender can be used to time the fireing of JavaScript functions
+        that needs to access the DOM.
+      </p>
+      <div class="w3-text-gray w3-small">December 29, 2024</div>
+    </div>
+  </div>
+</body>
+
+</html>
