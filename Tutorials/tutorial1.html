@@ -14,10 +14,10 @@
 </head>
 
 <body>
-  <div class="w3-content">
-    <div class="w3-display-container"> <img src="../images/tutorial1/BlazorComputer.png"
-        style="width:100%; object-fit:cover" alt="" /> </div>
-    <div class="w3-container">
+  <div class="w3-display-container"> <img src="../images/tutorial1/BlazorComputer.png"
+      style="width:100%; object-fit:cover" alt="" /> </div>
+  <div class="w3-container">
+    <div class="w3-content">
       <h2>Blazor introductory tutorial</h2>
       <p>
         <i>
@@ -26,7 +26,8 @@
         </i>
       </p>
       <p>
-        You can access the source for this demo project on <a href="https://github.com/KalleTakeuchi/TodoList"> github</a>.
+        You can access the source for this demo project on <a href="https://github.com/KalleTakeuchi/TodoList">
+          github</a>.
       </p>
       <p> This year (2024) I started working with Blazor. It is my first web framework and to be honest I never imagined
         myself doing any kind of web development. What kept the gate closed for me all these years was the rapid pace of
@@ -54,7 +55,8 @@
       <p>Essentially there are two variants of Blazor projects. One is where the html is rendered on the server side and
         transferred to the client. The other uses Web Assembly to basically run a .Net runtime in the browser and the
         rendering is done entirely on the client side. Needless to say, the case for using client side rendering grows
-        stronger the more computationally intensive the application is. The downside of client side apps is that you have
+        stronger the more computationally intensive the application is. The downside of client side apps is that you
+        have
         to develop a backend for your app. Web Assembly apps cannot, for example, connect to databases, so you need a
         backend application to handle that. Using server side rendering, everything is done on the server, so you can
         use the full functionality of .Net, including entity framework for working with SQL-applications. </p>
@@ -150,10 +152,12 @@
       </div>
       <h3>Making a component</h3>
       <p> Having dabbled in making websites before, I always found it strange how normal html doesn’t have the concept
-        of a component. A part of the website you define once and then reuse several times. Wouldn’t it be sweet to define a
+        of a component. A part of the website you define once and then reuse several times. Wouldn’t it be sweet to
+        define a
         reusable component to call wherever necessary. If it needs to be changed, it can be done in one place instead of
         all over the website. And if it needs to be customized or dynamically changed, you just pass arguments to it,
-        like a class in any language that supports OOP. This is what components in Blazor (and the corresponding concept in other frameworks) 
+        like a class in any language that supports OOP. This is what components in Blazor (and the corresponding concept
+        in other frameworks)
         can achieve. </p>
       <p> First we are going to create the list item component. Create a new razor component in the folder
         Components/PageComponents using the solution explorer. We can call it ListItem.razor. We are going to use
@@ -273,7 +277,8 @@
         parameters to be passed to the component. Their type is <span class="highlight">EventCallback</span>. In the
         html they are linked to events of the text input, circular div and the remove button. The parent component (or
         page) will pass method references to these parameters and they will be invoked by the event handlers in this
-        component. Note the @ before the event names in the html. In this case, the event handlers are defined in-line as
+        component. Note the @ before the event names in the html. In this case, the event handlers are defined in-line
+        as
         lambda functions, but you can use the name of a method in the component as well. If you want to pass arguments
         to the method, it must be called within a lambda function like this: </p>
       <div class="w3-panel w3-card w3-light-grey">
@@ -683,21 +688,21 @@
         <div class="w3-text-gray w3-small">List.razor</div>
       </div>
       <p>
-        Much of the code should explain itself. We have properties that are used in the HTML part 
-        of the file and lists that hold data. Users and list items are stored as JSON files using 
-        serializers included in .NET. 
-      </p> 
-      <p>One thing to take note of when working with Blazor server 
-        projects is that the file IO operations take place on the server, not the client. 
-        Actually, all functions are executed on the server. So if you, for example, want to play a sound 
+        Much of the code should explain itself. We have properties that are used in the HTML part
+        of the file and lists that hold data. Users and list items are stored as JSON files using
+        serializers included in .NET.
+      </p>
+      <p>One thing to take note of when working with Blazor server
+        projects is that the file IO operations take place on the server, not the client.
+        Actually, all functions are executed on the server. So if you, for example, want to play a sound
         and use the .NET functions for this, sound will not play on the client browser,
-        but in your server room, assuming your server has a speaker. However, 
+        but in your server room, assuming your server has a speaker. However,
         JavaScript is always executed on the client browser. So you can use Javascript
-        to do file IO or other stuff client side. 
+        to do file IO or other stuff client side.
       </p>
       <p>
         Another important aspect of Blazor is the lifecycle methods. In this case we are overriding
-        OnInitializedAsync. This allows us to do stuff as the webpage is loaded. In 
+        OnInitializedAsync. This allows us to do stuff as the webpage is loaded. In
         this case we load the users and list items from storage. If no users are found we
         add a default user.
       </p>
